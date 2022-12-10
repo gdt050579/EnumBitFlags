@@ -3,10 +3,6 @@ use std::str::FromStr;
 
 extern crate proc_macro;
 
-static impl_template: &str = r"
-
-";
-
 enum State {
     ExpectEnum,
     ExpectName,
@@ -37,7 +33,13 @@ impl Parser {
             if (txt!="enum") && (txt!="flags") {
                 panic!("Expecting an enum keywork but got: {}",txt);
             }
-            self.output.push_str("struct $$(NAME)$$ { value: u32 }\n impl $$(NAME)$$ {\n");
+            self.output.push_str(r#"
+            #[derive(Copy,Clone,Debug)]
+            struct $$(NAME)$$ { 
+                value: u32 
+            }
+            impl $$(NAME)$$ {
+            "#);
             self.state = State::ExpectName;
         } else {
             panic!("Expecting an enum keyword but got: {:?}",token);
@@ -89,7 +91,7 @@ impl Parser {
             if let Some(pos) = text_str.find(|ch| (ch=='u' || (ch=='i'))) {
                 text_str = &text_str[..pos];
             }
-            println!("Text={}, str={}",&text,text_str);
+            //println!("Text={}, str={}",&text,text_str);
             let value = text_str.parse::<u32>();
             if value.is_err() {
                 panic!("Expecting an integer value (but got: {})",text);
@@ -150,6 +152,6 @@ pub fn EnumBitFlags(_args: TokenStream, input: TokenStream) -> TokenStream {
     p.add_methods();
     p.add_operators();
     p.replace_template_parameters();
-    println!("{}",p.output.as_str());
+    //println!("{}",p.output.as_str());
     return TokenStream::from_str(p.output.as_str()).expect("Failed to parse string as tokens");
 }

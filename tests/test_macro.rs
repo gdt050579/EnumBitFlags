@@ -11,5 +11,5 @@ enum Test {
 #[test]
 fn test_1() {
     let t = Test::V1;
-    println!("OK");
+    println!("t = {:?}",t);
 }
