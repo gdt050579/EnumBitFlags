@@ -129,6 +129,13 @@ impl Parser {
         self.output.push_str("}\n\n");
     }
     fn add_operators(&mut self) {
+        // suport for bitor '|' operations
+        self.output.push_str(r#"
+        impl std::ops::BitOr for $$(NAME)$$ {
+            type Output = Self;        
+            #[inline]
+            fn bitor(self, rhs: Self) -> Self::Output { $$(NAME)$$ {value: self.value | rhs.value } }            
+        }"#);
     }
 }
 
@@ -137,6 +144,7 @@ pub fn EnumBitFlags(_args: TokenStream, input: TokenStream) -> TokenStream {
     let mut p = Parser::new();
     p.parse(input);
     p.add_methods();
+    p.add_operators();
     println!("{}",p.output.as_str());
     return TokenStream::new();
 }
