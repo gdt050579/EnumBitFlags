@@ -1,7 +1,7 @@
 use EnumBitFlags::EnumBitFlags;
 
 
-#[EnumBitFlags]
+#[EnumBitFlags(bits : 32,empty:None)]
 enum Test {
     V1 = 1,
     V2 = 2,
@@ -10,7 +10,7 @@ enum Test {
 
 #[test]
 fn test_bit_or() {
-    let t = Test::V1 | Test::V2;
+    let t = Test::V1 | Test::V2;    
     assert!(t.contains(Test::V1));
     assert!(t.contains(Test::V2));
     assert!(t.contains(Test::V3)==false);
