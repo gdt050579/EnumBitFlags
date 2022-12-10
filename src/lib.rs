@@ -127,7 +127,7 @@ impl Parser {
         }    
     }
     fn add_methods(&mut self) {
-        self.output.push_str("pub fn contains(&self, obj: $$(NAME)$$) -> bool { (self.value & obj.value) != 0 }\n");
+        self.output.push_str("pub fn contains(&self, obj: $$(NAME)$$) -> bool { ((self.value & obj.value) == obj.value) && (obj.value!=0) }\n");
         self.output.push_str("pub fn is_empty(&self) -> bool { self.value == 0 }\n");
         self.output.push_str("}\n\n");
     }
