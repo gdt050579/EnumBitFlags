@@ -124,7 +124,7 @@ impl Parser {
         }    
     }
     fn add_methods(&mut self) {
-        self.output.push_str("fn contains(&self, obj: $$NAME$$) -> bool { (self.value & obj.value) != 0 }\n");
+        self.output.push_str("fn contains(&self, obj: $$(NAME)$$) -> bool { (self.value & obj.value) != 0 }\n");
         self.output.push_str("fn is_empty(&self) -> bool { self.value == 0 }\n");
         self.output.push_str("}\n\n");
     }
@@ -137,6 +137,9 @@ impl Parser {
             fn bitor(self, rhs: Self) -> Self::Output { $$(NAME)$$ {value: self.value | rhs.value } }            
         }"#);
     }
+    fn replace_template_parameters(&mut self) {
+        self.output = self.output.replace("$$(NAME)$$", self.name.as_str());
+    }
 }
 
 #[proc_macro_attribute]
@@ -145,6 +148,7 @@ pub fn EnumBitFlags(_args: TokenStream, input: TokenStream) -> TokenStream {
     p.parse(input);
     p.add_methods();
     p.add_operators();
+    p.replace_template_parameters();
     println!("{}",p.output.as_str());
     return TokenStream::new();
 }
