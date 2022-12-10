@@ -1,0 +1,13 @@
+[package]
+name = "EnumBitFlags"
+version = "0.1.0"
+edition = "2021"
+authors = ["gavrilut.dragos@gmail.com"]
+description = "EnumBitFlags is an implementation of flags support for enums"
+license="MIT"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+proc-macro = true
+
+[dependencies]
