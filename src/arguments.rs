@@ -30,7 +30,7 @@ impl Arguments {
             value: String::new(),
         }
     }
-    fn validate_bits_size(&mut self) {
+    fn validate_bits_attribute(&mut self) {
         match self.value.as_str() {
             "8" => self.flags_type = FlagsType::U8,
             "16" => self.flags_type = FlagsType::U16,
@@ -43,9 +43,14 @@ impl Arguments {
             }
         }
     }
+    fn validate_empty_attribute(&mut self) {
+        self.none_case.clear();
+        self.none_case.push_str(&self.value.as_str());
+    }
     fn validate_key_value_pair(&mut self) {
         match self.key.as_str() {
-            "bits" => self.validate_bits_size(),
+            "bits" => self.validate_bits_attribute(),
+            "empty"=> self.validate_empty_attribute(),
             _ => {
                 panic!("Unknown attribute ({}) for EnumBitFlags. Accepted one are 'bits' and 'empty' !",self.key.as_str());
             }
@@ -111,7 +116,7 @@ impl Arguments {
     }
     pub fn parse(&mut self, input: TokenStream) {
         for token in input.into_iter() {
-            println!("arg_token: {:?}", token);
+            // println!("arg_token: {:?}", token);
             match self.state {
                 State::ExpectKey => self.validate_expect_key(token),
                 State::ExpectEqual => self.validate_expect_equal(token),
