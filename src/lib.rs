@@ -139,6 +139,12 @@ impl Parser {
             #[inline]
             fn bitor(self, rhs: Self) -> Self::Output { $$(NAME)$$ {value: self.value | rhs.value } }            
         }"#);
+        // suport for bitorassign '|=' operations
+        self.output.push_str(r#"
+        impl std::ops::BitOrAssign for $$(NAME)$$ {   
+            #[inline]
+            fn bitor_assign(&mut self, rhs: Self)  { self.value |= rhs.value; }            
+        }"#);        
     }
     fn replace_template_parameters(&mut self) {
         self.output = self.output.replace("$$(NAME)$$", self.name.as_str());
