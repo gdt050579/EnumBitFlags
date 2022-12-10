@@ -42,7 +42,7 @@ impl Arguments {
     }
     fn validate_expect_equal(&mut self, token: TokenTree) {
         if let TokenTree::Punct(punctuation) = token {
-            if (punctuation.as_char() != '=') || (punctuation.as_char() != ':') {
+            if (punctuation.as_char() != '=') && (punctuation.as_char() != ':') {
                 panic!("Expecting asignamne ('=' or ':') symbol but got: {}",punctuation.as_char());
             }
             self.state = State::ExpectValue;
@@ -53,6 +53,9 @@ impl Arguments {
     fn validate_expect_value(&mut self, token: TokenTree) {
         if let TokenTree::Ident(ident) = token {
             self.value = ident.to_string();           
+            self.state = State::ExpectComma;
+        } else if let TokenTree::Literal(literal) = token {
+            self.value = literal.to_string();           
             self.state = State::ExpectComma;
         } else {
             panic!("Expecting a value (a-zA-Z0-9) but got: `{}`",token.to_string());
@@ -70,6 +73,7 @@ impl Arguments {
     } 
     pub fn parse(&mut self, input: TokenStream) {
         for token in input.into_iter() {
+            println!("arg_token: {:?}",token);
             match self.state {
                 State::ExpectKey => self.validate_expect_key(token),
                 State::ExpectEqual => self.validate_expect_equal(token),
