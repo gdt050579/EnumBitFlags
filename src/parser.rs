@@ -40,6 +40,7 @@ impl Parser {
                 value: u32 
             }
             impl $$(NAME)$$ {
+                pub const $$(EMPTY)$$: $$(NAME)$$ = $$(NAME)$$ { value: 0 };
             "#);
             self.state = State::ExpectName;
         } else {
@@ -159,8 +160,10 @@ impl Parser {
     }
     pub fn replace_template_parameters(&mut self) {
         self.output = self.output.replace("$$(NAME)$$", self.name.as_str());
+        self.output = self.output.replace("$$(EMPTY)$$", self.args.none_case.as_str());
     }
     pub fn stream(self) -> TokenStream {
+        //println!("result = {}",self.output.as_str());
         return TokenStream::from_str(self.output.as_str()).expect("Failed to parse string as tokens");
     }
 }

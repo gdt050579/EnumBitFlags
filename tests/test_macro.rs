@@ -1,8 +1,15 @@
 use EnumBitFlags::EnumBitFlags;
 
 
-#[EnumBitFlags(bits : 32,empty:None)]
+#[EnumBitFlags(bits : 32,empty=None)]
 enum Test {
+    V1 = 1,
+    V2 = 2,
+    V3 = 4
+}
+
+#[EnumBitFlags(empty=NoBitsSet)]
+enum Test2 {
     V1 = 1,
     V2 = 2,
     V3 = 4
@@ -10,7 +17,7 @@ enum Test {
 
 #[test]
 fn test_bit_or() {
-    let t = Test::V1 | Test::V2;    
+    let t = Test::V1 | Test::V2;   
     assert!(t.contains(Test::V1));
     assert!(t.contains(Test::V2));
     assert!(t.contains(Test::V3)==false);
@@ -25,4 +32,12 @@ fn test_bit_or_assign() {
     assert!(t.contains(Test::V1));
     assert!(t.contains(Test::V2));
     assert!(t.contains(Test::V3)==false);
+}
+
+#[test]
+fn test_empty() {
+    let mut t = Test2::NoBitsSet;
+    assert!(t.is_empty());
+    t = Test2::V1;
+    assert!(t.is_empty()==false);
 }
