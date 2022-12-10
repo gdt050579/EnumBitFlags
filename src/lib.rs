@@ -1,4 +1,5 @@
 use proc_macro::*;
+use std::str::FromStr;
 
 extern crate proc_macro;
 
@@ -150,5 +151,5 @@ pub fn EnumBitFlags(_args: TokenStream, input: TokenStream) -> TokenStream {
     p.add_operators();
     p.replace_template_parameters();
     println!("{}",p.output.as_str());
-    return TokenStream::new();
+    return TokenStream::from_str(p.output.as_str()).expect("Failed to parse string as tokens");
 }
