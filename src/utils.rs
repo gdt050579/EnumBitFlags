@@ -8,7 +8,7 @@ pub fn validate_enum_variant_name(name: &str) -> bool {
             continue;
         }
         if (ch >= '0') && (ch <= '9') {
-            if (index == 0) {
+            if index == 0 {
                 return false;
             } else {
                 continue;

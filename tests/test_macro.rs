@@ -1,7 +1,7 @@
 use EnumBitFlags::EnumBitFlags;
 
 
-#[EnumBitFlags(bits : 32,empty=None)]
+#[EnumBitFlags(bits : 8,empty=None)]
 enum Test {
     V1 = 1,
     V2 = 2,
@@ -40,4 +40,10 @@ fn test_empty() {
     assert!(t.is_empty());
     t = Test2::V1;
     assert!(t.is_empty()==false);
+}
+
+#[test]
+fn test_size() {
+    assert!(std::mem::size_of::<Test>()==1); // u8
+    assert!(std::mem::size_of::<Test2>()==4);// u32
 }
