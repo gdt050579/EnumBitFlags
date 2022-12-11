@@ -3,6 +3,7 @@ use proc_macro::*;
 
 use super::arguments::*;
 use super::utils::*;
+use std::collections::HashMap;
 use std::str::FromStr;
 
 enum State {
@@ -20,6 +21,9 @@ pub struct Parser {
     name: String,
     state: State,
     args: Arguments,
+    last_variant: String,
+    map_values: HashMap<u128,String>,
+    map_names: HashMap<u64,u128>
 }
 
 impl Parser {
@@ -29,6 +33,9 @@ impl Parser {
             name: String::new(),
             state: State::ExpectEnum,
             args: arguments,
+            last_variant: String::new(),
+            map_values: HashMap::with_capacity(8),
+            map_names: HashMap::with_capacity(8),
         }
     }
     fn validate_expect_enum(&mut self, token: TokenTree) {
