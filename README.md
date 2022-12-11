@@ -36,7 +36,7 @@ fn main() {
 # Arguments
 EnumBitFlags supports various arguments that provide additional information on how to build the enum. Arguments are specified in the `EnumBitFlags` arguments with the following format: `key=value,key=value,...`. Alternativelly, you can use `:` instead of `=` (`key:value, key:value....`)
 
-* `**bits**`  In-memory representation of the bitfield. It could be one of the following:`8`, `16`, `32`, `64` or `128`. If not specified the default value is `32`.
+* `bits`  In-memory representation of the bitfield. It could be one of the following:`8`, `16`, `32`, `64` or `128`. If not specified the default value is `32`.
   _Example_
   ```rs
   #[EnumBitFlags(bits=8)]
@@ -46,7 +46,7 @@ EnumBitFlags supports various arguments that provide additional information on h
     Flag_3 = 0x04
   }
   ```
-* `**empty**` The name of the empty variant. An empty variant is the case where not bits are being set up. If not specified, it will `None` will be generated. The name of the empty variant must NOT be present in the enum variants and must start with a letter or underline character and can contain letters, numbers and the underline character. _Example_
+* `empty` The name of the empty variant. An empty variant is the case where not bits are being set up. If not specified, it will `None` will be generated. The name of the empty variant must NOT be present in the enum variants and must start with a letter or underline character and can contain letters, numbers and the underline character. _Example_
   ```rs
   #[EnumBitFlags(empty=Nothing)]
   enum MyFlags {
@@ -59,3 +59,29 @@ EnumBitFlags supports various arguments that provide additional information on h
     let f = MyFlags::Nothing;
   }
   ```
+  
+  # Methods
+  Every EnumBitFlags has several methods that can be used to easily manipulate and chek bits status:
+  * `contains` Checks if an exact bitflag mask is present
+     ```rs
+     fn contains(obj: <EnumName>) -> bool
+     ```
+     The obj must not be empty (at least one bit has to be set) and all bits from the object must be present.
+     Example:
+     ```rs
+     #[EnumBitFlags]
+     enum MyFlags { A = 1, B = 2, C = 4 }
+     
+     fn main() {
+        let t = MyFlags::A | MyFlags::B;
+        if t.contains(MyFlags::A) { 
+          /* this code will be executed */ 
+        }
+        if t.contains(MyFlags::A | MyFlags::B) {
+          /* this code will be executed */ 
+        }
+        if t.contains(MyFlags::A | MyFlags::C) {
+          /* this code WILL NOT BE REACHED as flags C is not set in variable t */
+        }
+     }
+
