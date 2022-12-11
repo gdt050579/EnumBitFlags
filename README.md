@@ -20,5 +20,11 @@ enum MyFlags {
 
 fn main() {
   let flags = MyFlags::Flag_1 | MyFlags::Flag_2;
+  if flags.contains(MyFlags::Flag_1) {
+    println!("Flag_1 is present");
+  }
+  if (flags & MyFlags::Flag_2) == MyFlags::Flag_2 {
+    println!("Flag_2 is present");
+  }
 }
 ```
