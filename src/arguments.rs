@@ -1,5 +1,6 @@
-use proc_macro::*;
 use super::flags_type::FlagsType;
+use super::utils;
+use proc_macro::*;
 
 enum State {
     ExpectKey,
@@ -34,18 +35,20 @@ impl Arguments {
             "128" => self.flags_type = FlagsType::U128,
             _ => {
                 panic!("The value for `bits` attribute can be 8,16,32,64 or 128. Provided value was: {}",self.value.as_str());
-
             }
         }
     }
     fn validate_empty_attribute(&mut self) {
+        if !utils::validate_enum_variant_name(self.value.as_str()) {
+            panic!("Invalid name for the empty case. A valid name should contains letters, numbers or underline and must not start with a number.");
+        }
         self.none_case.clear();
-        self.none_case.push_str(&self.value.as_str());
+        self.none_case.push_str(self.value.as_str());
     }
     fn validate_key_value_pair(&mut self) {
         match self.key.as_str() {
             "bits" => self.validate_bits_attribute(),
-            "empty"=> self.validate_empty_attribute(),
+            "empty" => self.validate_empty_attribute(),
             _ => {
                 panic!("Unknown attribute ({}) for EnumBitFlags. Accepted one are 'bits' and 'empty' !",self.key.as_str());
             }
