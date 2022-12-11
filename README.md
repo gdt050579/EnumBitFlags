@@ -1,2 +1,2 @@
 # EnumBitFlags
-An enum bit flag crate for Rust
+A proc-macro crate for Rust that allows creating bit flags enums.
