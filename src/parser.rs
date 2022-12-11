@@ -21,7 +21,8 @@ pub struct Parser {
     name: String,
     state: State,
     args: Arguments,
-    last_variant: String,
+    last_flag: String,
+    last_flag_hash: u64,
     map_values: HashMap<u128,String>,
     map_names: HashMap<u64,u128>
 }
@@ -33,7 +34,8 @@ impl Parser {
             name: String::new(),
             state: State::ExpectEnum,
             args: arguments,
-            last_variant: String::new(),
+            last_flag: String::new(),
+            last_flag_hash: 0,
             map_values: HashMap::with_capacity(8),
             map_names: HashMap::with_capacity(8),
         }
@@ -86,8 +88,13 @@ impl Parser {
     }
     fn validate_expect_flag(&mut self, token: TokenTree) {
         if let TokenTree::Ident(ident) = token {
+            self.last_flag = ident.to_string();
+            self.last_flag_hash = super::utils::compute_string_hash(self.last_flag.as_bytes());
+            if self.map_names.contains_key(&self.last_flag_hash) {
+                panic!("Key {} is used twice in the enum (keep in mind that case is not checked -> \"AB\" and \"ab\" are considered the same variant",self.last_flag.as_str());
+            }
             self.output.push_str("\tpub const ");
-            self.output.push_str(ident.to_string().as_str());
+            self.output.push_str(self.last_flag.as_str());
             self.output.push_str(": $$(NAME)$$ = $$(NAME)$$ { value: ");
             self.state = State::ExpectEqual;
         } else {
