@@ -183,6 +183,13 @@ impl Parser {
             fn bitand_assign(&mut self, rhs: Self)  { self.value &= rhs.value; }            
         }"#);  
 
+        // suport for partial EQ '==' and '!=' operations
+        self.output.push_str(r#"
+        impl std::cmp::PartialEq for $$(NAME)$$ {   
+            #[inline]
+            fn eq(&self, other: &Self) -> bool  { self.value == other.value }            
+        }"#);          
+
         // suport default
         self.output.push_str(r#"
         impl std::default::Default for $$(NAME)$$ {

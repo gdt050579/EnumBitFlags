@@ -115,3 +115,13 @@ fn test_default_implementation() {
     let t = Test::default();
     assert!(t.is_empty());  
 }
+
+#[test]
+fn test_cmp_opes() {
+    let mut t = Test::V1;
+    assert!(t == Test::V1);
+    assert!(t != Test::V1|Test::V2);
+    t |= Test::V2;
+    assert!(t != Test::V1);
+    assert!(t == Test::V1|Test::V2);
+}
