@@ -37,7 +37,7 @@ impl Parser {
             self.output.push_str(r#"
             #[derive(Copy,Clone,Debug)]
             struct $$(NAME)$$ { 
-                value: u32 
+                value: $$(BITS)$$ 
             }
             impl $$(NAME)$$ {
                 pub const $$(EMPTY)$$: $$(NAME)$$ = $$(NAME)$$ { value: 0 };
@@ -161,6 +161,7 @@ impl Parser {
     pub fn replace_template_parameters(&mut self) {
         self.output = self.output.replace("$$(NAME)$$", self.name.as_str());
         self.output = self.output.replace("$$(EMPTY)$$", self.args.none_case.as_str());
+        self.output = self.output.replace("$$(BITS)$$", self.args.flags_type.as_str());
     }
     pub fn stream(self) -> TokenStream {
         //println!("result = {}",self.output.as_str());

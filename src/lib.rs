@@ -1,10 +1,11 @@
 mod parser;
 mod arguments;
+mod flags_type;
+mod utils;
 
 use proc_macro::*;
 use parser::*;
 use arguments::*;
-
 
 extern crate proc_macro;
 
