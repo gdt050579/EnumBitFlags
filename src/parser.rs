@@ -12,7 +12,7 @@ enum State {
     ExpectFlag,
     ExpectEqual,
     ExpectValue,
-    ExpectSeparatorOrCloseBrace,
+    ExpectComma,
 }
 
 pub struct Parser {
@@ -38,11 +38,15 @@ impl Parser {
             map_values: HashMap::with_capacity(8),
             map_names: HashMap::with_capacity(8),
         }
-    }
+    }  
     fn validate_expect_enum(&mut self, token: TokenTree) {
         if let TokenTree::Ident(ident) = token {
             let txt = ident.to_string();
-            if (txt != "enum") && (txt != "flags") {
+            if txt == "pub" {
+                self.state = State::ExpectEnum;
+                return;
+            }            
+            if txt != "enum" {
                 panic!("Expecting an enum keywork but got: {}", txt);
             }
             self.output.push_str(
@@ -140,12 +144,12 @@ impl Parser {
             self.map_names.insert(self.last_flag_hash, value);
             self.output.push_str(&format!("0x{}{}",value,self.args.flags_type.as_str()));
             self.output.push_str(" };\n");
-            self.state = State::ExpectSeparatorOrCloseBrace;
+            self.state = State::ExpectComma;
         } else {
             panic!("Expecting the name of a flag but got: {:?}", token);
         }
     }
-    fn validate_expect_separator_or_close_braket(&mut self, token: TokenTree) {
+    fn validate_expect_comma(&mut self, token: TokenTree) {
         if let TokenTree::Punct(punctuation) = token {
             if punctuation.as_char() != ',' {
                 panic!("Expecting ',' separator but got: {}", punctuation.as_char());
@@ -164,9 +168,7 @@ impl Parser {
                 State::ExpectFlag => self.validate_expect_flag(token),
                 State::ExpectEqual => self.validate_expect_equal(token),
                 State::ExpectValue => self.validate_expect_value(token),
-                State::ExpectSeparatorOrCloseBrace => {
-                    self.validate_expect_separator_or_close_braket(token)
-                }
+                State::ExpectComma => self.validate_expect_comma(token)                
             }
         }
     }

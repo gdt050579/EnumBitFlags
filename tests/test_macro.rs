@@ -9,7 +9,7 @@ enum Test {
 }
 
 #[EnumBitFlags(empty=NoBitsSet)]
-enum Test2 {
+pub enum Test2 {
     V1 = 1,
     V2 = 2,
     V3 = 4
