@@ -2,7 +2,6 @@ use crate::flags_type::FlagsType;
 use proc_macro::*;
 
 use super::arguments::*;
-use super::utils::*;
 use std::collections::HashMap;
 use std::str::FromStr;
 

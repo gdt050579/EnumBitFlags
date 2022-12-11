@@ -70,7 +70,7 @@ fn validate_suffix(suffix: &[u8]) -> bool {
                 || ((suffix[0] == b'6') && (suffix[1] == b'4'));
         } /* u16/u32/u64 or i16/i32/i64 */
         3 => {
-            return ((suffix[0] == b'1') && (suffix[1] == b'2') && (suffix[2] == b'8'));
+            return (suffix[0] == b'1') && (suffix[1] == b'2') && (suffix[2] == b'8');
         } /* u128 or i128 */
         _ => {
             return false;
