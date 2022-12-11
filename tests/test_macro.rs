@@ -35,6 +35,24 @@ fn test_bit_or_assign() {
 }
 
 #[test]
+fn test_bit_and() {
+    let tmp = Test::V1 | Test::V2; 
+    let t = tmp & Test::V1;
+    assert!(t.contains(Test::V1));
+    assert!(t.contains(Test::V2)==false);
+    assert!(t.contains(Test::V3)==false);
+}
+
+#[test]
+fn test_bitand_assign() {
+    let mut t = Test::V1 | Test::V2; 
+    t &= Test::V1;
+    assert!(t.contains(Test::V1));
+    assert!(t.contains(Test::V2)==false);
+    assert!(t.contains(Test::V3)==false);
+}
+
+#[test]
 fn test_empty() {
     let mut t = Test2::NoBitsSet;
     assert!(t.is_empty());

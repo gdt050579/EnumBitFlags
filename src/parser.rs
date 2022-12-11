@@ -168,6 +168,21 @@ impl Parser {
             fn bitor_assign(&mut self, rhs: Self)  { self.value |= rhs.value; }            
         }"#);   
         
+        // suport for bitand '&' operations
+        self.output.push_str(r#"
+        impl std::ops::BitAnd for $$(NAME)$$ {
+            type Output = Self;        
+            #[inline]
+            fn bitand(self, rhs: Self) -> Self::Output { $$(NAME)$$ {value: self.value & rhs.value } }            
+        }"#);
+        
+        // suport for bitandassign '&=' operations
+        self.output.push_str(r#"
+        impl std::ops::BitAndAssign for $$(NAME)$$ {   
+            #[inline]
+            fn bitand_assign(&mut self, rhs: Self)  { self.value &= rhs.value; }            
+        }"#);  
+
         // suport default
         self.output.push_str(r#"
         impl std::default::Default for $$(NAME)$$ {
