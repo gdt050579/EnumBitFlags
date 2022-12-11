@@ -125,3 +125,14 @@ fn test_cmp_opes() {
     assert!(t != Test::V1);
     assert!(t == Test::V1|Test::V2);
 }
+
+#[test]
+fn test_contains() {
+    let t = Test::V1 | Test::V2; 
+    assert!(t.contains(Test::V1));
+    assert!(t.contains(Test::V2));
+    assert!(t.contains(Test::V3)==false);
+    assert!((t & Test::V1) == Test::V1);
+    assert!((t & Test::V2) == Test::V2);
+    assert!((t & Test::V3) == Test::None);
+}
