@@ -32,3 +32,30 @@ fn main() {
   }
 }
 ```
+
+# Arguments
+EnumBitFlags supports various arguments that provide additional information on how to build the enum. Arguments are specified in the `EnumBitFlags` arguments with the following format: `key=value,key=value,...`. Alternativelly, you can use `:` instead of `=` (`key:value, key:value....`)
+
+* `**bits**`  In-memory representation of the bitfield. It could be one of the following:`8`, `16`, `32`, `64` or `128`. If not specified the default value is `32`.
+  _Example_
+  ```rs
+  #[EnumBitFlags(bits=8)]
+  enum MyFlags {
+    Flag_1 = 0x01,
+    Flag_2 = 0x02,
+    Flag_3 = 0x04
+  }
+  ```
+* `**empty**` The name of the empty variant. An empty variant is the case where not bits are being set up. If not specified, it will `None` will be generated. The name of the empty variant must NOT be present in the enum variants and must start with a letter or underline character and can contain letters, numbers and the underline character. _Example_
+  ```rs
+  #[EnumBitFlags(empty=Nothing)]
+  enum MyFlags {
+    Flag_1 = 1,
+    Flag_2 = 2,
+    Flag_3 = 4
+  }
+  
+  fn main() {
+    let f = MyFlags::Nothing;
+  }
+  ```
