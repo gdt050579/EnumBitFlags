@@ -83,4 +83,5 @@ Every EnumBitFlags has several methods that can be used to easily manipulate and
       if t.contains(MyFlags::A | MyFlags::C) {
         /* this code WILL NOT BE REACHED as flags C is not set in variable t */
       }
-   }```
+   }
+  ```
