@@ -97,3 +97,27 @@ Every EnumBitFlags has several methods that can be used to easily manipulate and
       }
    }
   ```
+
+* `contains_one` Checks if at least one bit from the mask is present in the object
+   ```rs
+   fn contains_one(mask: <EnumName>) -> bool
+   ```
+   The obj must not be empty (at least one bit has to be set) .
+   Example:
+   ```rs
+   #[EnumBitFlags]
+   enum MyFlags { A = 1, B = 2, C = 4 }
+  
+   fn main() {
+      let t = MyFlags::A | MyFlags::B;
+      if t.contains_one(MyFlags::A) { 
+        /* this code will be executed */ 
+      }
+      if t.contains_one(MyFlags::A | MyFlags::B) {
+        /* this code will be executed */ 
+      }
+      if t.contains_one(MyFlags::A | MyFlags::C) {
+        /* this code will be executed */
+      }
+   }
+  ```
