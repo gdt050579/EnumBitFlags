@@ -9,6 +9,7 @@ use arguments::*;
 
 extern crate proc_macro;
 
+#[allow(non_snake_case)]
 #[proc_macro_attribute]
 pub fn EnumBitFlags(args: TokenStream, input: TokenStream) -> TokenStream {
     let mut a = Arguments::new();
