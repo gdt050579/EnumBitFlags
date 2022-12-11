@@ -91,7 +91,7 @@ impl Parser {
             self.last_flag = ident.to_string();
             self.last_flag_hash = super::utils::compute_string_hash(self.last_flag.as_bytes());
             if self.map_names.contains_key(&self.last_flag_hash) {
-                panic!("Key {} is used twice in the enum (keep in mind that case is not checked -> \"AB\" and \"ab\" are considered the same variant",self.last_flag.as_str());
+                panic!("Flag {} is used twice in the enum (keep in mind that case is not checked -> \"AB\" and \"ab\" are considered the same variant",self.last_flag.as_str());
             }
             self.output.push_str("\tpub const ");
             self.output.push_str(self.last_flag.as_str());
@@ -133,6 +133,12 @@ impl Parser {
             if (value > 0xFFFFFFFFFFFFFFFF) && (self.args.flags_type == FlagsType::U64) {
                 panic!("Enum is set to store data on 64 bits. The value {} is larger than the 0xFFFFFFFFFFFFFFFF (the maximum value allowed for an 64 bit value). Change the representation by using the attribute bits or change the value !",l.to_string());
             }            
+            if self.map_values.contains_key(&value)
+            {
+                panic!("Flag {} and {} have the same value !",self.map_values.get(&value).unwrap(),self.last_flag.as_str());
+            }
+            self.map_values.insert(value,self.last_flag.clone());
+            self.map_names.insert(self.last_flag_hash, value);
             self.output.push_str(&format!("0x{}{}",value,self.args.flags_type.as_str()));
             self.output.push_str(" };\n");
             self.state = State::ExpectSeparatorOrCloseBrace;

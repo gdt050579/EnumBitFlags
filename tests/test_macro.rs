@@ -5,7 +5,7 @@ use EnumBitFlags::EnumBitFlags;
 enum Test {
     V1 = 1,
     V2 = 2,
-    V3 = 128
+    V3 = 128,
 }
 
 #[EnumBitFlags(empty=NoBitsSet)]
