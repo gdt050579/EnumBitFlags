@@ -91,3 +91,9 @@ fn test_remove_method() {
     assert!(t.contains(Test::V1)==false);   
     assert!(t.is_empty()==true);  
 }
+
+#[test]
+fn test_default_implementation() {
+    let t = Test::default();
+    assert!(t.is_empty());  
+}
