@@ -60,28 +60,29 @@ EnumBitFlags supports various arguments that provide additional information on h
   }
   ```
   
-  # Methods
-  Every EnumBitFlags has several methods that can be used to easily manipulate and chek bits status:
-  * `contains` Checks if an exact bitflag mask is present
-     ```rs
-     fn contains(obj: <EnumName>) -> bool
-     ```
-     The obj must not be empty (at least one bit has to be set) and all bits from the object must be present.
-     Example:
-     ```rs
-     #[EnumBitFlags]
-     enum MyFlags { A = 1, B = 2, C = 4 }
-     
-     fn main() {
+# Methods
+Every EnumBitFlags has several methods that can be used to easily manipulate and chek bits status:
+
+* `contains` Checks if an exact bitflag mask is present
+    ```rs
+    fn contains(obj: <EnumName>) -> bool
+    ```
+    The obj must not be empty (at least one bit has to be set) and all bits from the object must be present.
+    Example:
+    ```rs
+    #[EnumBitFlags]
+    enum MyFlags { A = 1, B = 2, C = 4 }
+    
+    fn main() {
         let t = MyFlags::A | MyFlags::B;
         if t.contains(MyFlags::A) { 
-          /* this code will be executed */ 
+            /* this code will be executed */ 
         }
         if t.contains(MyFlags::A | MyFlags::B) {
-          /* this code will be executed */ 
+            /* this code will be executed */ 
         }
         if t.contains(MyFlags::A | MyFlags::C) {
-          /* this code WILL NOT BE REACHED as flags C is not set in variable t */
+            /* this code WILL NOT BE REACHED as flags C is not set in variable t */
         }
-     }
+    }```
 
