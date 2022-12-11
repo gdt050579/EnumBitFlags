@@ -76,7 +76,7 @@ Every EnumBitFlags has several methods that can be used to easily manipulate and
 
 * `contains` Checks if an exact bitflag mask is present
    ```rs
-   fn contains(obj: <EnumName>) -> bool
+   fn contains(&self, obj: <EnumName>) -> bool
    ```
    The obj must not be empty (at least one bit has to be set) and all bits from the object must be present.
    Example:
@@ -100,7 +100,7 @@ Every EnumBitFlags has several methods that can be used to easily manipulate and
 
 * `contains_one` Checks if at least one bit from the mask is present in the object
    ```rs
-   fn contains_one(mask: <EnumName>) -> bool
+   fn contains_one(&self, mask: <EnumName>) -> bool
    ```
    The obj must not be empty (at least one bit has to be set) .
    Example:
@@ -118,6 +118,26 @@ Every EnumBitFlags has several methods that can be used to easily manipulate and
       }
       if t.contains_one(MyFlags::A | MyFlags::C) {
         /* this code will be executed */
+      }
+   }
+  ```
+* `clear` Clears all bits from the enum
+   ```rs
+   fn clear(&mut self) 
+   ```
+   Example:
+   ```rs
+   #[EnumBitFlags]
+   enum MyFlags { A = 1, B = 2, C = 4 }
+  
+   fn main() {
+      let mut t = MyFlags::A | MyFlags::B;
+      if t.contains_one(MyFlags::A) { 
+        /* this code will be executed */ 
+      }
+      t.clear();
+      if t.contains(MyFlags::A) {
+        /* this code will NOT BE REACHED as t was cleared */ 
       }
    }
   ```
