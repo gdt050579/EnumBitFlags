@@ -1,3 +1,5 @@
+#[derive(Clone,Copy,PartialEq)]
+#[repr(u8)]
 pub enum FlagsType {
     U8,
     U16,

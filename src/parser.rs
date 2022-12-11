@@ -1,5 +1,8 @@
+use crate::flags_type::FlagsType;
 use proc_macro::*;
+
 use super::arguments::*;
+use super::utils::*;
 use std::str::FromStr;
 
 enum State {
@@ -25,96 +28,114 @@ impl Parser {
             output: String::with_capacity(1024),
             name: String::new(),
             state: State::ExpectEnum,
-            args: arguments
+            args: arguments,
         }
     }
     fn validate_expect_enum(&mut self, token: TokenTree) {
         if let TokenTree::Ident(ident) = token {
             let txt = ident.to_string();
-            if (txt!="enum") && (txt!="flags") {
-                panic!("Expecting an enum keywork but got: {}",txt);
+            if (txt != "enum") && (txt != "flags") {
+                panic!("Expecting an enum keywork but got: {}", txt);
             }
-            self.output.push_str(r#"
+            self.output.push_str(
+                r#"
             #[derive(Copy,Clone,Debug)]
             struct $$(NAME)$$ { 
                 value: $$(BITS)$$ 
             }
             impl $$(NAME)$$ {
                 pub const $$(EMPTY)$$: $$(NAME)$$ = $$(NAME)$$ { value: 0 };
-            "#);
+            "#,
+            );
             self.state = State::ExpectName;
         } else {
-            panic!("Expecting an enum keyword but got: {:?}",token);
+            panic!("Expecting an enum keyword but got: {:?}", token);
         }
     }
     fn validate_expect_enum_name(&mut self, token: TokenTree) {
         if let TokenTree::Ident(ident) = token {
-            self.name = ident.to_string();           
+            self.name = ident.to_string();
             self.state = State::ExpectOpenBrace;
         } else {
-            panic!("Expecting the name of the enum but got: {:?}",token);
+            panic!("Expecting the name of the enum but got: {:?}", token);
         }
-    }    
+    }
     fn validate_expect_open_brace(&mut self, token: TokenTree) {
         if let TokenTree::Group(group) = token {
             if group.delimiter() != Delimiter::Brace {
-                panic!("Expecting an open brace '{{' after enum name but got {:?}",group.delimiter());
+                panic!(
+                    "Expecting an open brace '{{' after enum name but got {:?}",
+                    group.delimiter()
+                );
             }
             self.state = State::ExpectFlag;
             self.parse(group.stream());
         } else {
-            panic!("Expecting an open brace '{{' after enum name but got {:?}",token);
+            panic!(
+                "Expecting an open brace '{{' after enum name but got {:?}",
+                token
+            );
         }
-    } 
+    }
     fn validate_expect_flag(&mut self, token: TokenTree) {
         if let TokenTree::Ident(ident) = token {
-            self.output.push_str("\tpub const ");         
+            self.output.push_str("\tpub const ");
             self.output.push_str(ident.to_string().as_str());
-            self.output.push_str(": $$(NAME)$$ = $$(NAME)$$ { value: ");         
+            self.output.push_str(": $$(NAME)$$ = $$(NAME)$$ { value: ");
             self.state = State::ExpectEqual;
         } else {
-            panic!("Expecting the name of a flag but got: {:?}",token);
+            panic!("Expecting the name of a flag but got: {:?}", token);
         }
-    } 
+    }
     fn validate_expect_equal(&mut self, token: TokenTree) {
         if let TokenTree::Punct(punctuation) = token {
             if punctuation.as_char() != '=' {
-                panic!("Expecting equal '=' symbol but got: {}",punctuation.as_char());
+                panic!(
+                    "Expecting equal '=' symbol but got: {}",
+                    punctuation.as_char()
+                );
             }
             self.state = State::ExpectValue;
         } else {
-            panic!("Expecting equal '=' symbol but got: {:?}",token);
+            panic!("Expecting equal '=' symbol but got: {:?}", token);
         }
-    } 
+    }
     fn validate_expect_value(&mut self, token: TokenTree) {
         if let TokenTree::Literal(l) = token {
-            let text = l.to_string();
-            let mut text_str = text.as_str();
-            if let Some(pos) = text_str.find(|ch| (ch=='u' || (ch=='i'))) {
-                text_str = &text_str[..pos];
+            let value = super::utils::string_to_number(l.to_string().as_str());
+            if value.is_none() {
+                panic!("Expecting an integer value (but got: {})", l.to_string());
             }
-            //println!("Text={}, str={}",&text,text_str);
-            let value = text_str.parse::<u32>();
-            if value.is_err() {
-                panic!("Expecting an integer value (but got: {})",text);
+            let value = value.unwrap();
+            if (value > 0xFF) && (self.args.flags_type == FlagsType::U8) {
+                panic!("Enum is set to store data on 8 bits. The value {} is larger than the 0xFF (the maximum value allowed for an 8 bit value). Change the representation by using the attribute bits or change the value !",l.to_string());
             }
-            self.output.push_str(&text);              
-            self.output.push_str(" };\n");       
+            if (value > 0xFFFF) && (self.args.flags_type == FlagsType::U16) {
+                panic!("Enum is set to store data on 16 bits. The value {} is larger than the 0xFFFF (the maximum value allowed for an 16 bit value). Change the representation by using the attribute bits or change the value !",l.to_string());
+            }
+            if (value > 0xFFFFFFFF) && (self.args.flags_type == FlagsType::U32) {
+                panic!("Enum is set to store data on 32 bits. The value {} is larger than the 0xFFFFFFFF (the maximum value allowed for an 32 bit value). Change the representation by using the attribute bits or change the value !",l.to_string());
+            }
+            if (value > 0xFFFFFFFFFFFFFFFF) && (self.args.flags_type == FlagsType::U64) {
+                panic!("Enum is set to store data on 64 bits. The value {} is larger than the 0xFFFFFFFFFFFFFFFF (the maximum value allowed for an 64 bit value). Change the representation by using the attribute bits or change the value !",l.to_string());
+            }            
+            self.output.push_str(&format!("0x{}{}",value,self.args.flags_type.as_str()));
+            self.output.push_str(" };\n");
             self.state = State::ExpectSeparatorOrCloseBrace;
         } else {
-            panic!("Expecting the name of a flag but got: {:?}",token);
+            panic!("Expecting the name of a flag but got: {:?}", token);
         }
-    } 
+    }
     fn validate_expect_separator_or_close_braket(&mut self, token: TokenTree) {
         if let TokenTree::Punct(punctuation) = token {
             if punctuation.as_char() != ',' {
-                panic!("Expecting ',' separator but got: {}",punctuation.as_char());
-            }     
+                panic!("Expecting ',' separator but got: {}", punctuation.as_char());
+            }
             self.state = State::ExpectFlag;
         } else {
-            panic!("Expecting ',' separator but got:  {:?}",token);
+            panic!("Expecting ',' separator but got:  {:?}", token);
         }
-    }     
+    }
     pub fn parse(&mut self, input: TokenStream) {
         for token in input.into_iter() {
             match self.state {
@@ -124,12 +145,15 @@ impl Parser {
                 State::ExpectFlag => self.validate_expect_flag(token),
                 State::ExpectEqual => self.validate_expect_equal(token),
                 State::ExpectValue => self.validate_expect_value(token),
-                State::ExpectSeparatorOrCloseBrace => self.validate_expect_separator_or_close_braket(token),
+                State::ExpectSeparatorOrCloseBrace => {
+                    self.validate_expect_separator_or_close_braket(token)
+                }
             }
-        }    
+        }
     }
     pub fn add_methods(&mut self) {
-        self.output.push_str(r#"
+        self.output.push_str(
+            r#"
         pub fn contains(&self, obj: $$(NAME)$$) -> bool { 
             return ((self.value & obj.value) == obj.value) && (obj.value!=0);
         }
@@ -150,7 +174,8 @@ impl Parser {
         }
     }
 
-        "#);
+        "#,
+        );
     }
     pub fn add_operators(&mut self) {
         // suport for bitor '|' operations
@@ -160,14 +185,16 @@ impl Parser {
             #[inline]
             fn bitor(self, rhs: Self) -> Self::Output { $$(NAME)$$ {value: self.value | rhs.value } }            
         }"#);
-        
+
         // suport for bitorassign '|=' operations
-        self.output.push_str(r#"
+        self.output.push_str(
+            r#"
         impl std::ops::BitOrAssign for $$(NAME)$$ {   
             #[inline]
             fn bitor_assign(&mut self, rhs: Self)  { self.value |= rhs.value; }            
-        }"#);   
-        
+        }"#,
+        );
+
         // suport for bitand '&' operations
         self.output.push_str(r#"
         impl std::ops::BitAnd for $$(NAME)$$ {
@@ -175,37 +202,45 @@ impl Parser {
             #[inline]
             fn bitand(self, rhs: Self) -> Self::Output { $$(NAME)$$ {value: self.value & rhs.value } }            
         }"#);
-        
+
         // suport for bitandassign '&=' operations
-        self.output.push_str(r#"
+        self.output.push_str(
+            r#"
         impl std::ops::BitAndAssign for $$(NAME)$$ {   
             #[inline]
             fn bitand_assign(&mut self, rhs: Self)  { self.value &= rhs.value; }            
-        }"#);  
+        }"#,
+        );
 
         // suport for partial EQ '==' and '!=' operations
-        self.output.push_str(r#"
+        self.output.push_str(
+            r#"
         impl std::cmp::PartialEq for $$(NAME)$$ {   
             #[inline]
             fn eq(&self, other: &Self) -> bool  { self.value == other.value }            
-        }"#);          
+        }"#,
+        );
 
         // suport default
-        self.output.push_str(r#"
+        self.output.push_str(
+            r#"
         impl std::default::Default for $$(NAME)$$ {
             fn default() -> Self { $$(NAME)$$ { value: 0 } }
-        }"#);   
-        
+        }"#,
+        );
     }
     pub fn replace_template_parameters(&mut self) {
         self.output = self.output.replace("$$(NAME)$$", self.name.as_str());
-        self.output = self.output.replace("$$(EMPTY)$$", self.args.none_case.as_str());
-        self.output = self.output.replace("$$(BITS)$$", self.args.flags_type.as_str());
+        self.output = self
+            .output
+            .replace("$$(EMPTY)$$", self.args.none_case.as_str());
+        self.output = self
+            .output
+            .replace("$$(BITS)$$", self.args.flags_type.as_str());
     }
     pub fn stream(self) -> TokenStream {
         //println!("result = {}",self.output.as_str());
-        return TokenStream::from_str(self.output.as_str()).expect("Failed to parse string as tokens");
+        return TokenStream::from_str(self.output.as_str())
+            .expect("Failed to parse string as tokens");
     }
 }
-
-
