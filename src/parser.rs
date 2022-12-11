@@ -139,6 +139,15 @@ impl Parser {
         pub fn is_empty(&self) -> bool { 
             return self.value == 0;
         }
+        pub fn clear(&mut self) {
+            self.value = 0;
+        }
+        pub fn remove(&mut self, obj: $$(NAME)$$) {
+            self.value = self.value - (self.value & obj.value);
+        }
+        pub fn set(&mut self, obj: $$(NAME)$$) {
+            self.value |= obj.value;
+        }
     }
 
         "#);

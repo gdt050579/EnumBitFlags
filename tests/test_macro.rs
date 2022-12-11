@@ -47,3 +47,47 @@ fn test_size() {
     assert!(std::mem::size_of::<Test>()==1); // u8
     assert!(std::mem::size_of::<Test2>()==4);// u32
 }
+
+#[test]
+fn test_clear_method() {
+    let mut t = Test::V1 | Test::V2;
+    assert!(t.is_empty()==false);
+    t.clear();
+    assert!(t.is_empty()==true);
+}
+
+#[test]
+fn test_set_method() {
+    let mut t = Test::V1;
+    assert!(t.contains(Test::V2)==false);
+    assert!(t.contains(Test::V1));
+    t.set(Test::V2);
+    assert!(t.contains(Test::V3)==false);
+    assert!(t.contains(Test::V2));
+    assert!(t.contains(Test::V1));
+}
+
+#[test]
+fn test_remove_method() {
+    let mut t = Test::V1|Test::V2;
+    assert!(t.contains(Test::V3)==false);
+    assert!(t.contains(Test::V2));
+    assert!(t.contains(Test::V1));
+    t.remove(Test::V2);
+    assert!(t.contains(Test::V3)==false);
+    assert!(t.contains(Test::V2)==false);
+    assert!(t.contains(Test::V1));
+    t.remove(Test::V3);
+    assert!(t.contains(Test::V3)==false);
+    assert!(t.contains(Test::V2)==false);
+    assert!(t.contains(Test::V1));    
+    t.remove(Test::V2);
+    assert!(t.contains(Test::V3)==false);
+    assert!(t.contains(Test::V2)==false);
+    assert!(t.contains(Test::V1));     
+    t.remove(Test::V1);
+    assert!(t.contains(Test::V3)==false);
+    assert!(t.contains(Test::V2)==false);
+    assert!(t.contains(Test::V1)==false);   
+    assert!(t.is_empty()==true);  
+}
