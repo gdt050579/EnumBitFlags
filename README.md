@@ -6,7 +6,7 @@ How to use:
 1. First you need to this crate to your `cargo.toml` file:
 ```toml
 [dependencies]
-EnumBitFlags = "0.1.0"
+EnumBitFlags = "1.0.0"
 ```
 
 2. Then, you can use it in your Rust project like this:
