@@ -62,6 +62,18 @@ EnumBitFlags supports various arguments that provide additional information on h
   
 # Methods
 Every EnumBitFlags has several methods that can be used to easily manipulate and chek bits status:
+
+|Method                    |Description|
+|--------------------------|-----------|
+|**obj.contains(mask)**    |Returns `true` if all set bits from the mask are present in the object, or `false` otherwise|
+|**obj.contains_one(mask)**|Returns `true` if at least one bit from the mask is present in the object, or `false` otherwise|
+|**obj.clear()**           |Clears all bits from the current object|
+|**obj.is_empty()**        |Returns `true` if not bits are set, `false` otherwise|
+|**obj.remove(mask)**      |Removes all set flags from the mask|
+|**obj.set(mask)**         |Set all bits from the mask|
+
+
+
 * `contains` Checks if an exact bitflag mask is present
    ```rs
    fn contains(obj: <EnumName>) -> bool
