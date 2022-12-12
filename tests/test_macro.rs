@@ -140,5 +140,5 @@ fn test_contains() {
 #[test]
 fn test_display() {
     let t = Test::V1 | Test::V2; 
-    println!("{}",t);
+    assert_eq!(format!("{}",t),"Test (V1 | V2)");
 }
