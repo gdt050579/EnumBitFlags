@@ -249,6 +249,29 @@ impl Parser {
             fn default() -> Self { $$(NAME)$$ { value: 0 } }
         }"#,
         );
+
+        // suport for Display
+        self.output.push_str(r#"
+        impl std::fmt::Display for $$(NAME)$$ {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                write!(f, "$$(NAME)$$" (")
+                if self.value == 0 {
+                    write!(f,"$$(EMPTY)$$)");
+                } else {
+                    let mut first = true;
+                "#);    
+        for (value,name) in &self.map_values {
+            self.output.push_str("if self.value & ");
+            self.output.push_str(&format!("0x{}{}",value,self.args.flags_type.as_str()));
+            self.output.push_str(" { if !first { write!(f,\" | \"); } else { first = false; } write!(f, \"");
+            self.output.push_str(name);
+            self.output.push_str(" };\n");
+        }
+        self.output.push_str(r#"            
+                }
+            }
+        }
+        "#);        
     }
     pub fn replace_template_parameters(&mut self) {
         self.output = self.output.replace("$$(NAME)$$", self.name.as_str());
