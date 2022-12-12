@@ -254,9 +254,9 @@ impl Parser {
         self.output.push_str(r#"
         impl std::fmt::Display for $$(NAME)$$ {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                write!(f, "$$(NAME)$$ (");
+                write!(f, "$$(NAME)$$ (")?;
                 if self.value == 0 {
-                    write!(f,"$$(EMPTY)$$)");
+                    write!(f,"$$(EMPTY)$$)")?;
                 } else {
                     let mut first = true;
                 "#);
@@ -269,12 +269,12 @@ impl Parser {
             self.output.push_str(&format!("0x{}{}",value,self.args.flags_type.as_str()));
             self.output.push_str(") == ");
             self.output.push_str(&format!("0x{}{}",value,self.args.flags_type.as_str()));
-            self.output.push_str(" { if !first { write!(f,\" | \"); } else { first = false; }; write!(f, \"");
+            self.output.push_str(" { if !first { write!(f,\" | \")?; } else { first = false; }; write!(f, \"");
             self.output.push_str(name);
-            self.output.push_str("\"); }\n");
+            self.output.push_str("\")?; }\n");
         }
         self.output.push_str(r#"
-                    write!(f,")");
+                    write!(f,")")?;
                 }
                 Ok(())            
             }
