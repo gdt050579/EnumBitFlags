@@ -260,8 +260,11 @@ impl Parser {
                 } else {
                     let mut first = true;
                 "#);
-        self.output.push_str("\n");    
-        for (value,name) in &self.map_values {
+        self.output.push_str("\n");   
+        // sort all items
+        let mut enum_variants: Vec<(&u128, &String)> = self.map_values.iter().collect();
+        enum_variants.sort_by(|e1,e2| e1.1.cmp(e2.1));
+        for (value,name) in enum_variants {
             self.output.push_str("\t\tif (self.value & ");
             self.output.push_str(&format!("0x{}{}",value,self.args.flags_type.as_str()));
             self.output.push_str(") == ");

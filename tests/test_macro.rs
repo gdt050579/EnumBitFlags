@@ -139,6 +139,8 @@ fn test_contains() {
 
 #[test]
 fn test_display() {
-    let t = Test::V1 | Test::V2; 
-    assert_eq!(format!("{}",t),"Test (V1 | V2)");
+    let t1 = Test::V1 | Test::V2; 
+    assert_eq!(format!("{}",t1),"Test (V1 | V2)");
+    let t2 = Test::default();
+    assert_eq!(format!("{}",t2),"Test (None)");
 }
