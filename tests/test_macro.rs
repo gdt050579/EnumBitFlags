@@ -136,3 +136,9 @@ fn test_contains() {
     assert!((t & Test::V2) == Test::V2);
     assert!((t & Test::V3) == Test::None);
 }
+
+#[test]
+fn test_display() {
+    let t = Test::V1 | Test::V2; 
+    println!("{}",t);
+}

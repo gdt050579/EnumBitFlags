@@ -253,22 +253,27 @@ impl Parser {
         // suport for Display
         self.output.push_str(r#"
         impl std::fmt::Display for $$(NAME)$$ {
-            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                write!(f, "$$(NAME)$$" (")
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                write!(f, "$$(NAME)$$ (");
                 if self.value == 0 {
                     write!(f,"$$(EMPTY)$$)");
                 } else {
                     let mut first = true;
-                "#);    
+                "#);
+        self.output.push_str("\n");    
         for (value,name) in &self.map_values {
-            self.output.push_str("if self.value & ");
+            self.output.push_str("\t\tif (self.value & ");
             self.output.push_str(&format!("0x{}{}",value,self.args.flags_type.as_str()));
-            self.output.push_str(" { if !first { write!(f,\" | \"); } else { first = false; } write!(f, \"");
+            self.output.push_str(") == ");
+            self.output.push_str(&format!("0x{}{}",value,self.args.flags_type.as_str()));
+            self.output.push_str(" { if !first { write!(f,\" | \"); } else { first = false; }; write!(f, \"");
             self.output.push_str(name);
-            self.output.push_str(" };\n");
+            self.output.push_str("\"); }\n");
         }
-        self.output.push_str(r#"            
+        self.output.push_str(r#"
+                    write!(f,")");
                 }
+                Ok(())            
             }
         }
         "#);        
