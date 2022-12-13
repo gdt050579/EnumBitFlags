@@ -22,8 +22,9 @@ pub struct Parser {
     args: Arguments,
     last_flag: String,
     last_flag_hash: u64,
-    map_values: HashMap<u128,String>,
-    map_names: HashMap<u64,u128>
+    map_values: HashMap<u128, String>,
+    map_names: HashMap<u64, u128>,
+    has_empty_value: bool
 }
 
 impl Parser {
@@ -37,15 +38,16 @@ impl Parser {
             last_flag_hash: 0,
             map_values: HashMap::with_capacity(8),
             map_names: HashMap::with_capacity(8),
+            has_empty_value: false,
         }
-    }  
+    }
     fn validate_expect_enum(&mut self, token: TokenTree) {
         if let TokenTree::Ident(ident) = token {
             let txt = ident.to_string();
             if txt == "pub" {
                 self.state = State::ExpectEnum;
                 return;
-            }            
+            }
             if txt != "enum" {
                 panic!("Expecting an enum keywork but got: {}", txt);
             }
@@ -56,7 +58,6 @@ impl Parser {
                 value: $$(BITS)$$ 
             }
             impl $$(NAME)$$ {
-                pub const $$(EMPTY)$$: $$(NAME)$$ = $$(NAME)$$ { value: 0 };
             "#,
             );
             self.state = State::ExpectName;
@@ -135,14 +136,28 @@ impl Parser {
             }
             if (value > 0xFFFFFFFFFFFFFFFF) && (self.args.flags_type == FlagsType::U64) {
                 panic!("Enum is set to store data on 64 bits. The value {} is larger than the 0xFFFFFFFFFFFFFFFF (the maximum value allowed for an 64 bit value). Change the representation by using the attribute bits or change the value !",l.to_string());
-            }            
-            if self.map_values.contains_key(&value)
-            {
-                panic!("Flag {} and {} have the same value !",self.map_values.get(&value).unwrap(),self.last_flag.as_str());
             }
-            self.map_values.insert(value,self.last_flag.clone());
+            if self.map_values.contains_key(&value) {
+                panic!(
+                    "Flag {} and {} have the same value !",
+                    self.map_values.get(&value).unwrap(),
+                    self.last_flag.as_str()
+                );
+            }
+            // check for None/Empty value
+            if value == 0 {
+                if self.args.has_empty_value {
+                    panic!("You have already specified a variant for cases where no bits are set in the arguments: '{}'. Either remove variant '{}' or remove the argument 'empty={}'", self.args.none_case.as_str(), self.last_flag.as_str(),self.args.none_case.as_str());
+                }
+                // all good --> mark has_empty_value so that we don't add one by default
+                self.has_empty_value = true;
+                self.args.none_case.clear();
+                self.args.none_case.push_str(&self.last_flag);
+            }
+            self.map_values.insert(value, self.last_flag.clone());
             self.map_names.insert(self.last_flag_hash, value);
-            self.output.push_str(&format!("0x{}{}",value,self.args.flags_type.as_str()));
+            self.output
+                .push_str(&format!("0x{}{}", value, self.args.flags_type.as_str()));
             self.output.push_str(" };\n");
             self.state = State::ExpectComma;
         } else {
@@ -168,11 +183,17 @@ impl Parser {
                 State::ExpectFlag => self.validate_expect_flag(token),
                 State::ExpectEqual => self.validate_expect_equal(token),
                 State::ExpectValue => self.validate_expect_value(token),
-                State::ExpectComma => self.validate_expect_comma(token)                
+                State::ExpectComma => self.validate_expect_comma(token),
             }
         }
     }
     pub fn add_methods(&mut self) {
+        // add empty case if needed
+        if !self.has_empty_value  {
+            self.output.push_str(r#"
+            pub const $$(EMPTY)$$: $$(NAME)$$ = $$(NAME)$$ { value: 0 };
+            "#);
+        }
         self.output.push_str(
             r#"
         pub fn contains(&self, obj: $$(NAME)$$) -> bool { 
@@ -251,7 +272,8 @@ impl Parser {
         );
 
         // suport for Display
-        self.output.push_str(r#"
+        self.output.push_str(
+            r#"
         impl std::fmt::Display for $$(NAME)$$ {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 write!(f, "$$(NAME)$$ (")?;
@@ -259,27 +281,34 @@ impl Parser {
                     write!(f,"$$(EMPTY)$$)")?;
                 } else {
                     let mut first = true;
-                "#);
-        self.output.push_str("\n");   
+                "#,
+        );
+        self.output.push_str("\n");
         // sort all items
         let mut enum_variants: Vec<(&u128, &String)> = self.map_values.iter().collect();
-        enum_variants.sort_by(|e1,e2| e1.1.cmp(e2.1));
-        for (value,name) in enum_variants {
+        enum_variants.sort_by(|e1, e2| e1.1.cmp(e2.1));
+        for (value, name) in enum_variants {
             self.output.push_str("\t\tif (self.value & ");
-            self.output.push_str(&format!("0x{}{}",value,self.args.flags_type.as_str()));
+            self.output
+                .push_str(&format!("0x{}{}", value, self.args.flags_type.as_str()));
             self.output.push_str(") == ");
-            self.output.push_str(&format!("0x{}{}",value,self.args.flags_type.as_str()));
-            self.output.push_str(" { if !first { write!(f,\" | \")?; } else { first = false; }; write!(f, \"");
+            self.output
+                .push_str(&format!("0x{}{}", value, self.args.flags_type.as_str()));
+            self.output.push_str(
+                " { if !first { write!(f,\" | \")?; } else { first = false; }; write!(f, \"",
+            );
             self.output.push_str(name);
             self.output.push_str("\")?; }\n");
         }
-        self.output.push_str(r#"
+        self.output.push_str(
+            r#"
                     write!(f,")")?;
                 }
                 Ok(())            
             }
         }
-        "#);        
+        "#,
+        );
     }
     pub fn replace_template_parameters(&mut self) {
         self.output = self.output.replace("$$(NAME)$$", self.name.as_str());

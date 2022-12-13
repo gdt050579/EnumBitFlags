@@ -14,6 +14,13 @@ pub enum Test2 {
     V2 = 2,
     V3 = 4
 }
+#[EnumBitFlags]
+pub enum Test3 {
+    V1 = 1,
+    V2 = 2,
+    V3 = 4,
+    Nothing = 0
+}
 
 #[test]
 fn test_bit_or() {
@@ -143,4 +150,10 @@ fn test_display() {
     assert_eq!(format!("{}",t1),"Test (V1 | V2)");
     let t2 = Test::default();
     assert_eq!(format!("{}",t2),"Test (None)");
+}
+
+#[test]
+fn test_empty_value() {
+    let t = Test3::default();
+    assert_eq!(t,Test3::Nothing);
 }

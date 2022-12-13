@@ -11,6 +11,7 @@ enum State {
 pub struct Arguments {
     pub flags_type: FlagsType,
     pub none_case: String,
+    pub has_empty_value: bool,
     state: State,
     key: String,
     value: String,
@@ -24,6 +25,7 @@ impl Arguments {
             state: State::ExpectKey,
             key: String::new(),
             value: String::new(),
+            has_empty_value: false, 
         }
     }
     fn validate_bits_attribute(&mut self) {
@@ -44,6 +46,7 @@ impl Arguments {
         }
         self.none_case.clear();
         self.none_case.push_str(self.value.as_str());
+        self.has_empty_value = true;
     }
     fn validate_key_value_pair(&mut self) {
         match self.key.as_str() {
