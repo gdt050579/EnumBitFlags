@@ -22,6 +22,13 @@ pub enum Test3 {
     Nothing = 0
 }
 
+#[EnumBitFlags(disable_empty_generation: true)]
+pub enum Test4 {
+    V1 = 1,
+    V2 = 2,
+    V3 = 4,
+}
+
 #[test]
 fn test_bit_or() {
     let t = Test::V1 | Test::V2;   

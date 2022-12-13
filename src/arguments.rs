@@ -12,6 +12,7 @@ pub struct Arguments {
     pub flags_type: FlagsType,
     pub none_case: String,
     pub has_empty_value: bool,
+    pub disable_empty_generation: bool,
     state: State,
     key: String,
     value: String,
@@ -26,6 +27,7 @@ impl Arguments {
             key: String::new(),
             value: String::new(),
             has_empty_value: false, 
+            disable_empty_generation: false,
         }
     }
     fn validate_bits_attribute(&mut self) {
@@ -47,11 +49,24 @@ impl Arguments {
         self.none_case.clear();
         self.none_case.push_str(self.value.as_str());
         self.has_empty_value = true;
+    }  
+    fn validate_noempty_attribute(&mut self) {
+        match self.value.as_str() {
+            "true" => self.disable_empty_generation = true,
+            "yes" => self.disable_empty_generation = true,
+            "false" => self.disable_empty_generation = false,
+            "no" => self.disable_empty_generation = false,
+            _ => {
+                panic!("The value for `disable_empty_generation` attribute can only be 'true' or 'false'. Provided value was: {}",self.value.as_str());
+            }
+        }
     }
+  
     fn validate_key_value_pair(&mut self) {
         match self.key.as_str() {
             "bits" => self.validate_bits_attribute(),
             "empty" => self.validate_empty_attribute(),
+            "disable_empty_generation" => self.validate_noempty_attribute(),
             _ => {
                 panic!("Unknown attribute ({}) for EnumBitFlags. Accepted one are 'bits' and 'empty' !",self.key.as_str());
             }

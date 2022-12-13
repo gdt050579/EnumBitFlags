@@ -146,6 +146,9 @@ impl Parser {
             }
             // check for None/Empty value
             if value == 0 {
+                if self.args.disable_empty_generation {
+                    panic!("You have disabled empty variant generation. As such, no variant with value 0 is possible. Remove the flag `{}` or remove the attribute 'disable_empty_generation'", self.last_flag.as_str());
+                }
                 if self.args.has_empty_value {
                     panic!("You have already specified a variant for cases where no bits are set in the arguments: '{}'. Either remove variant '{}' or remove the argument 'empty={}'", self.args.none_case.as_str(), self.last_flag.as_str(),self.args.none_case.as_str());
                 }
@@ -189,7 +192,7 @@ impl Parser {
     }
     pub fn add_methods(&mut self) {
         // add empty case if needed
-        if !self.has_empty_value  {
+        if (!self.has_empty_value) && (self.args.disable_empty_generation==false)  {
             self.output.push_str(r#"
             pub const $$(EMPTY)$$: $$(NAME)$$ = $$(NAME)$$ { value: 0 };
             "#);
