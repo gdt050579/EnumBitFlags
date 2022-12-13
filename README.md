@@ -60,6 +60,20 @@ EnumBitFlags supports various arguments that provide additional information on h
   }
   ```
   
+* `disable_empty_generation` Disables the generation of an empty (value 0) variant. By default this is `None` but the name can be changed by using the `empty` attribute. This attribute will also disable any manual variant with value 0 (e.g. ```No_flag = 0```) _Example_
+  ```rs
+  #[EnumBitFlags(disable_empty_generation=true)]
+  enum MyFlags {
+    Flag_1 = 1,
+    Flag_2 = 2,
+    Flag_3 = 4
+  }
+  
+  fn main() {
+    let f = MyFlags::Nothing;
+  }
+  ```
+
 # Methods
 Every EnumBitFlags has several methods that can be used to easily manipulate and chek bits status:
 

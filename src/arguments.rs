@@ -68,7 +68,7 @@ impl Arguments {
             "empty" => self.validate_empty_attribute(),
             "disable_empty_generation" => self.validate_noempty_attribute(),
             _ => {
-                panic!("Unknown attribute ({}) for EnumBitFlags. Accepted one are 'bits' and 'empty' !",self.key.as_str());
+                panic!("Unknown attribute `{}` for EnumBitFlags. Accepted attributes are 'bits' , 'empty' and 'disable_empty_generation' !",self.key.as_str());
             }
         }
     }
