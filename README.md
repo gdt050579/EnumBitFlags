@@ -70,7 +70,7 @@ EnumBitFlags supports various arguments that provide additional information on h
   }
   
   fn main() {
-    let f = MyFlags::Nothing;
+    let f = MyFlags::None; // this code will produce an error as variant None will not be generated
   }
   ```
 
