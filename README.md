@@ -46,7 +46,7 @@ EnumBitFlags supports various arguments that provide additional information on h
     Flag_3 = 0x04
   }
   ```
-* `empty` The name of the empty variant. An empty variant is the case where not bits are being set up. If not specified, it will `None` will be generated. The name of the empty variant must NOT be present in the enum variants and must start with a letter or underline character and can contain letters, numbers and the underline character. _Example_
+* `empty` The name of the empty variant. An empty variant is the case where not bits are being set up. If not specified, `None` will be generated. The name of the empty variant must NOT be present in the enum variants and must start with a letter or underline character and can contain letters, numbers and the underline character. _Example_
   ```rs
   #[EnumBitFlags(empty=Nothing)]
   enum MyFlags {
