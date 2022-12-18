@@ -331,7 +331,7 @@ impl Parser {
             .replace("$$(VISIBILITY)$$", self.visibility.as_str());
     }
     pub fn stream(self) -> TokenStream {
-        println!("result = {}",self.output.as_str());
+        //println!("result = {}",self.output.as_str());
         return TokenStream::from_str(self.output.as_str())
             .expect("Failed to parse string as tokens");
     }
