@@ -21,10 +21,11 @@ pub struct Parser {
     state: State,
     args: Arguments,
     last_flag: String,
+    visibility: String,
     last_flag_hash: u64,
     map_values: HashMap<u128, String>,
     map_names: HashMap<u64, u128>,
-    has_empty_value: bool
+    has_empty_value: bool,
 }
 
 impl Parser {
@@ -32,6 +33,7 @@ impl Parser {
         Parser {
             output: String::with_capacity(1024),
             name: String::new(),
+            visibility: String::new(),
             state: State::ExpectEnum,
             args: arguments,
             last_flag: String::new(),
@@ -46,6 +48,7 @@ impl Parser {
             let txt = ident.to_string();
             if txt == "pub" {
                 self.state = State::ExpectEnum;
+                self.visibility.push_str("pub");
                 return;
             }
             if txt != "enum" {
@@ -54,7 +57,7 @@ impl Parser {
             self.output.push_str(
                 r#"
             #[derive(Copy,Clone,Debug)]
-            struct $$(NAME)$$ { 
+            $$(VISIBILITY)$$ struct $$(NAME)$$ { 
                 value: $$(BITS)$$ 
             }
             impl $$(NAME)$$ {
@@ -192,10 +195,12 @@ impl Parser {
     }
     pub fn add_methods(&mut self) {
         // add empty case if needed
-        if (!self.has_empty_value) && (self.args.disable_empty_generation==false)  {
-            self.output.push_str(r#"
+        if (!self.has_empty_value) && (self.args.disable_empty_generation == false) {
+            self.output.push_str(
+                r#"
             pub const $$(EMPTY)$$: $$(NAME)$$ = $$(NAME)$$ { value: 0 };
-            "#);
+            "#,
+            );
         }
         self.output.push_str(
             r#"
@@ -321,9 +326,12 @@ impl Parser {
         self.output = self
             .output
             .replace("$$(BITS)$$", self.args.flags_type.as_str());
+        self.output = self
+            .output
+            .replace("$$(VISIBILITY)$$", self.visibility.as_str());
     }
     pub fn stream(self) -> TokenStream {
-        //println!("result = {}",self.output.as_str());
+        println!("result = {}",self.output.as_str());
         return TokenStream::from_str(self.output.as_str())
             .expect("Failed to parse string as tokens");
     }
