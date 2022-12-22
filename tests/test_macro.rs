@@ -164,3 +164,13 @@ fn test_empty_value() {
     let t = Test3::default();
     assert_eq!(t,Test3::Nothing);
 }
+
+#[test]
+fn test_get_value() {
+    let mut t = Test3::default();
+    assert_eq!(t.get_value(),0);
+    t = Test3::V1 | Test3::V2;
+    assert_eq!(t.get_value(),3);
+    t.remove(Test3::V1);
+    assert_eq!(t.get_value(),Test3::V2.get_value());
+}
