@@ -85,7 +85,7 @@ Every EnumBitFlags has several methods that can be used to easily manipulate and
 |**obj.is_empty()**        |Returns `true` if not bits are set, `false` otherwise|
 |**obj.remove(mask)**      |Removes all set flags from the mask|
 |**obj.set(mask)**         |Set all bits from the mask|
-
+|**obj.get_value()**       |Returns the numerical value associated to the bit mask flags|
 
 
 * `contains` Checks if an exact bitflag mask is present
