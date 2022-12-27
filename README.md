@@ -6,7 +6,7 @@ How to use:
 1. First you need to this crate to your `cargo.toml` file:
 ```toml
 [dependencies]
-EnumBitFlags = "1.0.4"
+EnumBitFlags = "1.0.5"
 ```
 
 2. Then, you can use it in your Rust project like this:
@@ -71,6 +71,16 @@ EnumBitFlags supports various arguments that provide additional information on h
   
   fn main() {
     let f = MyFlags::None; // this code will produce an error as variant None will not be generated
+  }
+  ```
+
+  * `debug` Will print the resulted structure after parsing.  _Example_
+  ```rs
+  #[EnumBitFlags(debug=true)]
+  enum MyFlags {
+    Flag_1 = 1,
+    Flag_2 = 2,
+    Flag_3 = 4
   }
   ```
 
