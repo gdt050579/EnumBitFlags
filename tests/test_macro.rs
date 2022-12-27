@@ -29,6 +29,28 @@ pub enum Test4 {
     V3 = 4,
 }
 
+#[EnumBitFlags(bits=16)]
+pub enum Test_16bit {
+    V1 = 1,
+    V2 = 2,
+    V3 = 4,
+    V4 = 0x8000
+}
+#[EnumBitFlags(bits=32)]
+pub enum Test_32bit {
+    V1 = 1,
+    V2 = 2,
+    V3 = 4,
+    V4 = 0x80000000
+}
+#[EnumBitFlags(bits=64)]
+pub enum Test_64bit {
+    V1 = 1,
+    V2 = 2,
+    V3 = 4,
+    V4 = 0x8000000000000000
+}
+
 #[test]
 fn test_bit_or() {
     let t = Test::V1 | Test::V2;   
@@ -78,6 +100,9 @@ fn test_empty() {
 fn test_size() {
     assert!(std::mem::size_of::<Test>()==1); // u8
     assert!(std::mem::size_of::<Test2>()==4);// u32
+    assert!(std::mem::size_of::<Test_16bit>()==2);// u16
+    assert!(std::mem::size_of::<Test_32bit>()==4);// u32
+    assert!(std::mem::size_of::<Test_64bit>()==8);// u64
 }
 
 #[test]
