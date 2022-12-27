@@ -29,7 +29,7 @@ pub enum Test4 {
     V3 = 4,
 }
 
-#[EnumBitFlags(bits=16)]
+#[EnumBitFlags(bits=16,debug=true)]
 pub enum Test_16bit {
     V1 = 1,
     V2 = 2,

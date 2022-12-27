@@ -13,6 +13,7 @@ pub struct Arguments {
     pub none_case: String,
     pub has_empty_value: bool,
     pub disable_empty_generation: bool,
+    pub debug_mode: bool,
     state: State,
     key: String,
     value: String,
@@ -26,8 +27,9 @@ impl Arguments {
             state: State::ExpectKey,
             key: String::new(),
             value: String::new(),
-            has_empty_value: false, 
+            has_empty_value: false,
             disable_empty_generation: false,
+            debug_mode: false,
         }
     }
     fn validate_bits_attribute(&mut self) {
@@ -49,24 +51,41 @@ impl Arguments {
         self.none_case.clear();
         self.none_case.push_str(self.value.as_str());
         self.has_empty_value = true;
-    }  
-    fn validate_noempty_attribute(&mut self) {
-        match self.value.as_str() {
-            "true" => self.disable_empty_generation = true,
-            "yes" => self.disable_empty_generation = true,
-            "false" => self.disable_empty_generation = false,
-            "no" => self.disable_empty_generation = false,
+    }
+    fn string_to_bool(text: &str) -> Option<bool> {
+        match text {
+            "true" | "yes" => {
+                return Some(true);
+            }
+            "false" | "no" => {
+                return Some(false);
+            }
             _ => {
-                panic!("The value for `disable_empty_generation` attribute can only be 'true' or 'false'. Provided value was: {}",self.value.as_str());
+                return None;
             }
         }
     }
-  
+    fn validate_noempty_attribute(&mut self) {
+        if let Some(value) = Arguments::string_to_bool(self.value.as_str()) {
+            self.disable_empty_generation = value;
+        } else {
+            panic!("The value for `disable_empty_generation` attribute can only be 'true' or 'false'. Provided value was: {}",self.value.as_str());
+        }
+    }
+    fn validate_debug_attribute(&mut self) {
+        if let Some(value) = Arguments::string_to_bool(self.value.as_str()) {
+            self.debug_mode = value;
+        } else {
+            panic!("The value for `debug` attribute can only be 'true' or 'false'. Provided value was: {}",self.value.as_str());
+        }
+    }
+
     fn validate_key_value_pair(&mut self) {
         match self.key.as_str() {
             "bits" => self.validate_bits_attribute(),
             "empty" => self.validate_empty_attribute(),
             "disable_empty_generation" => self.validate_noempty_attribute(),
+            "debug" => self.validate_debug_attribute(),
             _ => {
                 panic!("Unknown attribute `{}` for EnumBitFlags. Accepted attributes are 'bits' , 'empty' and 'disable_empty_generation' !",self.key.as_str());
             }

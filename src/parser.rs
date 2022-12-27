@@ -163,7 +163,7 @@ impl Parser {
             self.map_values.insert(value, self.last_flag.clone());
             self.map_names.insert(self.last_flag_hash, value);
             self.output
-                .push_str(&format!("0x{}{}", value, self.args.flags_type.as_str()));
+                .push_str(&format!("0x{:X}{}", value, self.args.flags_type.as_str()));
             self.output.push_str(" };\n");
             self.state = State::ExpectComma;
         } else {
@@ -334,7 +334,12 @@ impl Parser {
             .replace("$$(VISIBILITY)$$", self.visibility.as_str());
     }
     pub fn stream(self) -> TokenStream {
-        //println!("result = {}",self.output.as_str());
+        if self.args.debug_mode {
+            println!("Debug mode enable ==> Printing the output !");
+            println!("=====================================================================================================");            
+            println!("{}",self.output.as_str());
+            println!("=====================================================================================================");            
+        }
         return TokenStream::from_str(self.output.as_str())
             .expect("Failed to parse string as tokens");
     }
