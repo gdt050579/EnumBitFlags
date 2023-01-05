@@ -268,6 +268,7 @@ impl Parser {
         // suport for partial EQ '==' and '!=' operations
         self.output.push_str(
             r#"
+        impl std::cmp::Eq for $$(NAME)$$ { }
         impl std::cmp::PartialEq for $$(NAME)$$ {   
             #[inline]
             fn eq(&self, other: &Self) -> bool  { self.value == other.value }            
