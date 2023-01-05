@@ -199,3 +199,10 @@ fn test_get_value() {
     t.remove(Test3::V1);
     assert_eq!(t.get_value(),Test3::V2.get_value());
 }
+#[test]
+fn test_const_get_value() {
+    let t = (Test::V1 | Test::V2).get_value();
+    assert_eq!(t,3);
+    const CONST_T: u8 = Test::V1.get_value() | Test::V2.get_value();
+    assert_eq!(CONST_T,3);
+}

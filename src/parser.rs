@@ -222,7 +222,7 @@ impl Parser {
         pub fn set(&mut self, obj: $$(NAME)$$) {
             self.value |= obj.value;
         }
-        pub fn get_value(&self)->$$(BITS)$$ {
+        pub const fn get_value(&self)->$$(BITS)$$ {
             self.value
         }
     }
