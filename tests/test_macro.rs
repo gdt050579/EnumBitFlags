@@ -223,3 +223,11 @@ fn test_visibility_group() {
     const CONST_T: u32 = TestVisibilityEnum::V1.get_value() | TestVisibilityEnum::V2.get_value();
     assert_eq!(CONST_T,3);
 }
+
+#[test]
+fn test_new() {
+    assert_eq!(Test::new(3), Some(Test::V1 | Test::V2));
+    assert_eq!(Test::new(255), None);
+    assert_eq!(Test4::new(3), Some(Test4::V1 | Test4::V2));
+    assert_eq!(Test4::new(0), None);
+}

@@ -4,6 +4,7 @@ use proc_macro::*;
 use super::arguments::*;
 use std::collections::HashMap;
 use std::str::FromStr;
+use std::u64;
 
 enum State {
     ExpectVisibility,
@@ -28,6 +29,7 @@ pub struct Parser {
     map_values: HashMap<u128, String>,
     map_names: HashMap<u64, u128>,
     has_empty_value: bool,
+    all_set_bits: u128,
 }
 
 impl Parser {
@@ -43,6 +45,7 @@ impl Parser {
             map_values: HashMap::with_capacity(8),
             map_names: HashMap::with_capacity(8),
             has_empty_value: false,
+            all_set_bits: 0, 
         }
     }
     fn validate_expect_visibility(&mut self, token: TokenTree) {
@@ -187,13 +190,14 @@ impl Parser {
                 self.has_empty_value = true;
                 self.args.none_case.clear();
                 self.args.none_case.push_str(&self.last_flag);
-            }
+            }                        
             self.map_values.insert(value, self.last_flag.clone());
             self.map_names.insert(self.last_flag_hash, value);
             self.output
                 .push_str(&format!("0x{:X}{}", value, self.args.flags_type.as_str()));
             self.output.push_str(" };\n");
             self.state = State::ExpectComma;
+            self.all_set_bits |= value;
         } else {
             panic!("Expecting the name of a flag but got: {:?}", token);
         }
@@ -234,6 +238,15 @@ impl Parser {
         }
         self.output.push_str(
             r#"
+        
+        $$(VISIBILITY)$$ fn new(value: $$(BITS)$$) -> Option<Self> {
+            $$(DISABLE_EMPTY_CODE)$$
+            if value & $$(ALL_SET_BITS)$$ as $$(BITS)$$ == value {
+                return Some($$(NAME)$$ { value } );
+            }
+            None
+        } 
+
         #[inline(always)]
         $$(VISIBILITY)$$ fn contains(&self, obj: $$(NAME)$$) -> bool { 
             return ((self.value & obj.value) == obj.value) && (obj.value!=0);
@@ -370,6 +383,19 @@ impl Parser {
         self.output = self
             .output
             .replace("$$(VISIBILITY)$$", self.visibility.as_str());
+        self.output = self
+            .output
+            .replace("$$(ALL_SET_BITS)$$", self.all_set_bits.to_string().as_str());
+        if self.args.disable_empty_generation {
+            self.output = self
+                .output
+                .replace("$$(DISABLE_EMPTY_CODE)$$", "if value==0 { return None; };")
+        }
+        else {
+            self.output = self
+                .output
+                .replace("$$(DISABLE_EMPTY_CODE)$$", "")
+        }
     }
     pub fn stream(self) -> TokenStream {
         if self.args.debug_mode {
