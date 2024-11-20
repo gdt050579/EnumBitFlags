@@ -6,7 +6,7 @@ How to use:
 1. First you need to this crate to your `cargo.toml` file:
 ```toml
 [dependencies]
-EnumBitFlags = "1.0.7"
+EnumBitFlags = "1.0.8"
 ```
 
 2. Then, you can use it in your Rust project like this:
@@ -32,6 +32,29 @@ fn main() {
   }
 }
 ```
+
+
+Moreover, the following function allows you to create an object from a numeric value:
+`fn new(value: T) -> Option<Self>` where `T` is an unsigned numeric type (`u8`, `u16`, `u32`, `u64`).
+
+```rust
+#[EnumBitFlags]
+enum MyFlags {
+  Flag_1 = 0x0001,
+  Flag_2 = 0x0002,
+  Flag_3 = 0x0004
+}
+
+fn main() {
+  if let Some(y) = MyFlags::new(5) {
+        println!("{y}");
+    }
+    else {
+        eprintln!("Could not create value!");
+    }
+}
+```
+
 
 # Arguments
 EnumBitFlags supports various arguments that provide additional information on how to build the enum. Arguments are specified in the `EnumBitFlags` arguments with the following format: `key=value,key=value,...`. Alternativelly, you can use `:` instead of `=` (`key:value, key:value....`)
