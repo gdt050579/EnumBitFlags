@@ -14,6 +14,7 @@ pub enum Test2 {
     V2 = 2,
     V3 = 4
 }
+
 #[EnumBitFlags]
 pub enum Test3 {
     V1 = 1,
@@ -49,6 +50,14 @@ pub enum Test_64bit {
     V2 = 2,
     V3 = 4,
     V4 = 0x8000000000000000
+}
+
+#[EnumBitFlags]
+pub(crate) enum TestVisibilityEnum {
+    V1 = 1,
+    V2 = 2,
+    V3 = 4,
+    V4 = 8
 }
 
 #[test]
@@ -204,5 +213,13 @@ fn test_const_get_value() {
     let t = (Test::V1 | Test::V2).get_value();
     assert_eq!(t,3);
     const CONST_T: u8 = Test::V1.get_value() | Test::V2.get_value();
+    assert_eq!(CONST_T,3);
+}
+
+#[test]
+fn test_visibility_group() {
+    let t = (TestVisibilityEnum::V1 | TestVisibilityEnum::V2).get_value();
+    assert_eq!(t,3);
+    const CONST_T: u32 = TestVisibilityEnum::V1.get_value() | TestVisibilityEnum::V2.get_value();
     assert_eq!(CONST_T,3);
 }

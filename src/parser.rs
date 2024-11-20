@@ -6,6 +6,8 @@ use std::collections::HashMap;
 use std::str::FromStr;
 
 enum State {
+    ExpectVisibility,
+    ExpectVisibilityGroup,
     ExpectEnum,
     ExpectName,
     ExpectOpenBrace,
@@ -34,7 +36,7 @@ impl Parser {
             output: String::with_capacity(1024),
             name: String::new(),
             visibility: String::new(),
-            state: State::ExpectEnum,
+            state: State::ExpectVisibility,
             args: arguments,
             last_flag: String::new(),
             last_flag_hash: 0,
@@ -43,11 +45,37 @@ impl Parser {
             has_empty_value: false,
         }
     }
+    fn validate_expect_visibility(&mut self, token: TokenTree) {
+        if let TokenTree::Ident(ident) = token.clone() {
+            let txt = ident.to_string();
+            if txt == "pub" {
+                self.state = State::ExpectVisibilityGroup;                
+                self.visibility.push_str("pub");
+            } else {
+                self.validate_expect_enum(token);
+            }
+        } else {
+            panic!("Expecting an enum or pub keyword but got: {:?}", token);
+        }
+    }    
+    fn validate_expect_visibility_group(&mut self, token: TokenTree) {
+        if let TokenTree::Group(g) = token.clone() {
+            if g.delimiter() == Delimiter::Parenthesis {
+                self.visibility.push_str(token.to_string().as_str());
+                self.state = State::ExpectEnum;                
+            }
+            else {
+                panic!("Expecting a visibility group (for example: (crate), (super), ...) but got: {:?}", token);
+            }            
+        } else {
+            self.validate_expect_enum(token);
+        }
+    }    
     fn validate_expect_enum(&mut self, token: TokenTree) {
         if let TokenTree::Ident(ident) = token {
             let txt = ident.to_string();
             if txt == "pub" {
-                self.state = State::ExpectEnum;
+                self.state = State::ExpectEnum;                
                 self.visibility.push_str("pub");
                 return;
             }
@@ -100,7 +128,7 @@ impl Parser {
             if self.map_names.contains_key(&self.last_flag_hash) {
                 panic!("Flag {} is used twice in the enum (keep in mind that case is not checked -> \"AB\" and \"ab\" are considered the same variant",self.last_flag.as_str());
             }
-            self.output.push_str("\tpub const ");
+            self.output.push_str("\t$$(VISIBILITY)$$ const ");
             self.output.push_str(self.last_flag.as_str());
             self.output.push_str(": $$(NAME)$$ = $$(NAME)$$ { value: ");
             self.state = State::ExpectEqual;
@@ -183,6 +211,8 @@ impl Parser {
     pub fn parse(&mut self, input: TokenStream) {
         for token in input.into_iter() {
             match self.state {
+                State::ExpectVisibility => self.validate_expect_visibility(token),
+                State::ExpectVisibilityGroup => self.validate_expect_visibility_group(token),
                 State::ExpectEnum => self.validate_expect_enum(token),
                 State::ExpectName => self.validate_expect_enum_name(token),
                 State::ExpectOpenBrace => self.validate_expect_open_brace(token),
@@ -198,31 +228,38 @@ impl Parser {
         if (!self.has_empty_value) && (self.args.disable_empty_generation == false) {
             self.output.push_str(
                 r#"
-            pub const $$(EMPTY)$$: $$(NAME)$$ = $$(NAME)$$ { value: 0 };
+            $$(VISIBILITY)$$ const $$(EMPTY)$$: $$(NAME)$$ = $$(NAME)$$ { value: 0 };
             "#,
             );
         }
         self.output.push_str(
             r#"
-        pub fn contains(&self, obj: $$(NAME)$$) -> bool { 
+        #[inline(always)]
+        $$(VISIBILITY)$$ fn contains(&self, obj: $$(NAME)$$) -> bool { 
             return ((self.value & obj.value) == obj.value) && (obj.value!=0);
         }
-        pub fn contains_one(&self, obj: $$(NAME)$$) -> bool { 
+        #[inline(always)]
+        $$(VISIBILITY)$$ fn contains_one(&self, obj: $$(NAME)$$) -> bool { 
             return (self.value & obj.value) != 0 ;
-        }        
-        pub fn is_empty(&self) -> bool { 
+        }
+        #[inline(always)]        
+        $$(VISIBILITY)$$ fn is_empty(&self) -> bool { 
             return self.value == 0;
         }
-        pub fn clear(&mut self) {
+        #[inline(always)]
+        $$(VISIBILITY)$$ fn clear(&mut self) {
             self.value = 0;
         }
-        pub fn remove(&mut self, obj: $$(NAME)$$) {
+        #[inline(always)]
+        $$(VISIBILITY)$$ fn remove(&mut self, obj: $$(NAME)$$) {
             self.value = self.value - (self.value & obj.value);
         }
-        pub fn set(&mut self, obj: $$(NAME)$$) {
+        #[inline(always)]
+        $$(VISIBILITY)$$ fn set(&mut self, obj: $$(NAME)$$) {
             self.value |= obj.value;
         }
-        pub const fn get_value(&self)->$$(BITS)$$ {
+        #[inline(always)]
+        $$(VISIBILITY)$$ const fn get_value(&self)->$$(BITS)$$ {
             self.value
         }
     }
@@ -235,7 +272,7 @@ impl Parser {
         self.output.push_str(r#"
         impl std::ops::BitOr for $$(NAME)$$ {
             type Output = Self;        
-            #[inline]
+            #[inline(always)]
             fn bitor(self, rhs: Self) -> Self::Output { $$(NAME)$$ {value: self.value | rhs.value } }            
         }"#);
 
@@ -243,7 +280,7 @@ impl Parser {
         self.output.push_str(
             r#"
         impl std::ops::BitOrAssign for $$(NAME)$$ {   
-            #[inline]
+            #[inline(always)]
             fn bitor_assign(&mut self, rhs: Self)  { self.value |= rhs.value; }            
         }"#,
         );
@@ -252,7 +289,7 @@ impl Parser {
         self.output.push_str(r#"
         impl std::ops::BitAnd for $$(NAME)$$ {
             type Output = Self;        
-            #[inline]
+            #[inline(always)]
             fn bitand(self, rhs: Self) -> Self::Output { $$(NAME)$$ {value: self.value & rhs.value } }            
         }"#);
 
@@ -260,7 +297,7 @@ impl Parser {
         self.output.push_str(
             r#"
         impl std::ops::BitAndAssign for $$(NAME)$$ {   
-            #[inline]
+            #[inline(always)]
             fn bitand_assign(&mut self, rhs: Self)  { self.value &= rhs.value; }            
         }"#,
         );
@@ -270,7 +307,7 @@ impl Parser {
             r#"
         impl std::cmp::Eq for $$(NAME)$$ { }
         impl std::cmp::PartialEq for $$(NAME)$$ {   
-            #[inline]
+            #[inline(always)]
             fn eq(&self, other: &Self) -> bool  { self.value == other.value }            
         }"#,
         );
