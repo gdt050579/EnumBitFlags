@@ -237,8 +237,25 @@ impl Parser {
             );
         }
         self.output.push_str(
-            r#"
-        
+            r#"        
+        /// This function allows creating a new $$(NAME)$$ object from an $$(BITS)$$ value.
+        /// This method returns Some($$(NAME)$$) if the parameter `value` is a valid bit configuration, or None otherwise.
+        /// 
+        /// # Example
+        /// ```rust
+        /// #[EnumBitFlags]
+        /// enum MyFlags {
+        ///     Flag_1 = 0x0001,
+        ///     Flag_2 = 0x0002,
+        ///     Flag_3 = 0x0004
+        /// }
+        /// if let Some(y) = MyFlags::new(5) {
+        ///     println!("{y}");
+        /// }
+        /// else {
+        ///     eprintln!("Could not create value!");
+        /// }
+        /// ```        
         $$(VISIBILITY)$$ fn new(value: $$(BITS)$$) -> Option<Self> {
             $$(DISABLE_EMPTY_CODE)$$
             if value & $$(ALL_SET_BITS)$$ as $$(BITS)$$ == value {
@@ -246,31 +263,81 @@ impl Parser {
             }
             None
         } 
-
+       
+        /// Checks if all the values in the specified `mask` are set
+        /// within the internal value of the current object.
+        /// 
+        /// # Parameters
+        /// 
+        /// - `mask`: A `$$(NAME)$$` value representing the mask to check.
+        /// 
+        /// # Returns
+        ///
+        /// - `true` if all values in the `mask` are set in the current value.
+        /// - `false` otherwise.
         #[inline(always)]
-        $$(VISIBILITY)$$ fn contains(&self, obj: $$(NAME)$$) -> bool { 
-            return ((self.value & obj.value) == obj.value) && (obj.value!=0);
+        $$(VISIBILITY)$$ fn contains(&self, mask: $$(NAME)$$) -> bool { 
+            return ((self.value & mask.value) == mask.value) && (mask.value!=0);
         }
+        /// Checks if at least on of the values in the specified `mask` are set
+        /// within the internal value of the current object.
+        /// 
+        /// # Parameters
+        /// 
+        /// - `mask`: A `$$(NAME)$$` value representing the mask to check.
+        /// 
+        /// # Returns
+        ///
+        /// - `true` if at least one value in the `mask` is set in the current value.
+        /// - `false` otherwise.
         #[inline(always)]
-        $$(VISIBILITY)$$ fn contains_one(&self, obj: $$(NAME)$$) -> bool { 
-            return (self.value & obj.value) != 0 ;
+        $$(VISIBILITY)$$ fn contains_one(&self, mask: $$(NAME)$$) -> bool { 
+            return (self.value & mask.value) != 0 ;
         }
+        /// Checks if the current value is not set or if `disable_empty_generation` is `false` and the object is the empty value
+        /// # Returns
+        ///
+        /// - `true` if the current value is not set or is the empty value.
+        /// - `false` otherwise.
         #[inline(always)]        
         $$(VISIBILITY)$$ fn is_empty(&self) -> bool { 
             return self.value == 0;
         }
+        /// Clears the value or sets it to the empty value.
+        /// # Returns
+        ///
+        /// - `true` if the current value is not set or is the empty value.
+        /// - `false` otherwise.
         #[inline(always)]
         $$(VISIBILITY)$$ fn clear(&mut self) {
             self.value = 0;
         }
+        /// Removes the values set in the `mask` parameter from the current value.        
+        /// 
+        /// # Parameters
+        /// 
+        /// - `mask`: A `$$(NAME)$$` value representing the mask to remove.
+        ///         
         #[inline(always)]
-        $$(VISIBILITY)$$ fn remove(&mut self, obj: $$(NAME)$$) {
-            self.value = self.value - (self.value & obj.value);
+        $$(VISIBILITY)$$ fn remove(&mut self, mask: $$(NAME)$$) {
+            self.value = self.value - (self.value & mask.value);
         }
+        /// Adds the values set in the `mask` parameter to the current value.        
+        /// 
+        /// # Parameters
+        /// 
+        /// - `mask`: A `$$(NAME)$$` value representing the mask to add.
+        ///         
         #[inline(always)]
-        $$(VISIBILITY)$$ fn set(&mut self, obj: $$(NAME)$$) {
-            self.value |= obj.value;
+        $$(VISIBILITY)$$ fn set(&mut self, mask: $$(NAME)$$) {
+            self.value |= mask.value;
         }
+        /// Returns the underlying `$$(BITS)$$` value for this object.
+        /// 
+        /// # Returns
+        /// 
+        /// - The `$$(BITS)$$` value.
+        ///         
         #[inline(always)]
         $$(VISIBILITY)$$ const fn get_value(&self)->$$(BITS)$$ {
             self.value
