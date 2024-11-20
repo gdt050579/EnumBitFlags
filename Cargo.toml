@@ -6,7 +6,7 @@ authors = ["gavrilut.dragos@gmail.com"]
 description = "EnumBitFlags is an implementation of flags support for enums"
 license = "MIT"
 keywords = ["bitflags", "enum", "enumbitflags", "enumflags", "flags"]
-categoies = ["development-tools::procedural-macro-helpers"]
+categories = ["development-tools::procedural-macro-helpers"]
 repository = "https://github.com/gdt050579/EnumBitFlags/"
 readme = "README.md"
 
