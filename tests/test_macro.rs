@@ -226,8 +226,8 @@ fn test_visibility_group() {
 
 #[test]
 fn test_new() {
-    assert_eq!(Test::new(3), Some(Test::V1 | Test::V2));
-    assert_eq!(Test::new(255), None);
-    assert_eq!(Test4::new(3), Some(Test4::V1 | Test4::V2));
-    assert_eq!(Test4::new(0), None);
+    assert_eq!(Test::from_value(3), Some(Test::V1 | Test::V2));
+    assert_eq!(Test::from_value(255), None);
+    assert_eq!(Test4::from_value(3), Some(Test4::V1 | Test4::V2));
+    assert_eq!(Test4::from_value(0), None);
 }

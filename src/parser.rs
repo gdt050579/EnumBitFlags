@@ -249,14 +249,14 @@ impl Parser {
         ///     Flag_2 = 0x0002,
         ///     Flag_3 = 0x0004
         /// }
-        /// if let Some(y) = MyFlags::new(5) {
+        /// if let Some(y) = MyFlags::from_value(5) {
         ///     println!("{y}");
         /// }
         /// else {
         ///     eprintln!("Could not create value!");
         /// }
         /// ```        
-        $$(VISIBILITY)$$ fn new(value: $$(BITS)$$) -> Option<Self> {
+        $$(VISIBILITY)$$ fn from_value(value: $$(BITS)$$) -> Option<Self> {
             $$(DISABLE_EMPTY_CODE)$$
             if value & $$(ALL_SET_BITS)$$ as $$(BITS)$$ == value {
                 return Some($$(NAME)$$ { value } );

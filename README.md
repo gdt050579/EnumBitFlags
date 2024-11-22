@@ -35,7 +35,7 @@ fn main() {
 
 
 Moreover, the following function allows you to create an object from a numeric value:
-`fn new(value: T) -> Option<Self>` where `T` is an unsigned numeric type (`u8`, `u16`, `u32`, `u64`).
+`fn from_value(value: T) -> Option<Self>` where `T` is an unsigned numeric type (`u8`, `u16`, `u32`, `u64`).
 
 ```rust
 #[EnumBitFlags]
@@ -46,7 +46,7 @@ enum MyFlags {
 }
 
 fn main() {
-  if let Some(y) = MyFlags::new(5) {
+  if let Some(y) = MyFlags::from_value(5) {
         println!("{y}");
     }
     else {
