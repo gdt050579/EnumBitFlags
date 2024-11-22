@@ -243,6 +243,8 @@ impl Parser {
         /// 
         /// # Example
         /// ```rust
+        /// use EnumBitFlags::EnumBitFlags;
+        /// 
         /// #[EnumBitFlags]
         /// enum MyFlags {
         ///     Flag_1 = 0x0001,

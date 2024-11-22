@@ -1,6 +1,6 @@
 [package]
 name = "EnumBitFlags"
-version = "1.0.9"
+version = "1.0.10"
 edition = "2021"
 authors = ["gavrilut.dragos@gmail.com"]
 description = "EnumBitFlags is an implementation of flags support for enums"
